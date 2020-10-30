@@ -3,14 +3,17 @@ Created on Oct 27, 2020
 
 @author: david
 '''
+import os
+
+os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
 
 from numpy import mean
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import RepeatedStratifiedKFold
-from sklearn.svm import SVC
-from skopt.space import Integer
-from skopt.space import Real
-from skopt.space import Categorical
+# from sklearn.svm import SVC
+# from skopt.space import Integer
+# from skopt.space import Real
+# from skopt.space import Categorical
 import matplotlib.pyplot as plt
 
 from Experiment import Experiment
@@ -31,6 +34,7 @@ from keras.callbacks import EarlyStopping
 from keras.callbacks import ModelCheckpoint
 from keras.models import load_model
 from keras.regularizers import l2
+from keras.preprocessing.image import ImageDataGenerator
 
 # set experiment parameters
 trainSize = 50000
@@ -53,7 +57,7 @@ def define_model():
     model.add(Dense(10, activation='softmax'))
     # compile model
     # opt = SGD(lr=0.001, momentum=0.9)
-    opt = RMSprop(lr=0.001, momentum=0.01, decay=1e-6)
+    opt = RMSprop(lr=0.001, decay=1e-6)
     model.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy'])
     return model
 
@@ -67,8 +71,8 @@ def summarize_diagnostics(history):
     # plot accuracy
     plt.subplot(212)
     plt.title('Classification Accuracy')
-    plt.plot(history.history['accuracy'], color='blue', label='train')
-    plt.plot(history.history['val_accuracy'], color='orange', label='test')
+    plt.plot(history.history['acc'], color='blue', label='train')
+    plt.plot(history.history['val_acc'], color='orange', label='test')
     #===========================================================================
     # # save plot to file
     # filename = sys.argv[0].split('/')[-1]
@@ -96,7 +100,11 @@ def prep_pixels(trainX, testX):
     train_norm /= 255.0
     test_norm /= 255.0
     return train_norm, test_norm
-    
+
+def prep_output(trainY, testY):
+    trainY = to_categorical(trainY)
+    testY = to_categorical(testY)
+    return trainY, testY
 
 
 if __name__ == '__main__':
@@ -113,30 +121,28 @@ if __name__ == '__main__':
     # sumarize loaded dataset
     print('Train: X=%s, y=%s' % (trainX.shape, trainY.shape))
     print('Test: X=%s, y=%s' % (testX.shape, testY.shape))
-    #===========================================================================
-    # # plot first few images
-    # for i in range(9):
-    #     # define subplot
-    #     plt.subplot(3,3, 1 + i)
-    #     plt.imshow(trainX[i])
-    # plt.show()
-    #===========================================================================
+    # plot first few images
+    for i in range(9):
+        # define subplot
+        plt.subplot(3,3, 1 + i)
+        plt.imshow(trainX[i])
+    plt.savefig('experiments/cifar_img.png')
+    plt.close()
     # one hot encode target values
-    trainY = to_categorical(trainY)
-    testY = to_categorical(testY)
+    trainY, testY = prep_output(trainY, testY)
     # normalize pixels
     trainX, testX = prep_pixels(trainX, testX)
     # define model
     model = define_model()
     # define early stopping
-    es = EarlyStopping(monitor='val_accuracy', mode='max', patience=10, baseline=0.4, min_delta=0.001, verbose=1)
+    es = EarlyStopping(monitor='val_acc', mode='max', patience=10, baseline=0.4, min_delta=0.001, verbose=1)
     # define model saving
-    mc = ModelCheckpoint('E:/CIFAR10/cnn_model.h5', monitor='val_accuracy', mode='max', verbose=1, save_best_only=True)
+    mc = ModelCheckpoint('/home/david/diplomska/models/cnn_cifar10.h5', monitor='val_acc', mode='max', verbose=1, save_best_only=True)
     # fit model
-    history = model.fit(trainX, trainY, epochs=100, batch_size=64, validation_split=0.3,
-                        callbacks=[es, mc], verbose=1, use_multiprocessing=True)
+    history = model.fit(trainX, trainY, epochs=100, batch_size=64, validation_split=0.2,
+                        callbacks=[es, mc], verbose=1)
     # load saved model
-    saved_model = load_model('E:/CIFAR10/cnn_model.h5')
+    saved_model = load_model('/home/david/diplomska/models/cnn_cifar10.h5')
     # evalueate model
     _, acc = saved_model.evaluate(testX, testY, verbose=0)
     print('> %.3f' % (acc * 100.0))
@@ -152,9 +158,9 @@ if __name__ == '__main__':
     # experiment.plot_convergence()
     # plt.show()
     #===========================================================================
-    
+
     #===========================================================================
     # # Viri in literatura
-    # # https://github.com/mok232/CIFAR-10-Image-Classification 
+    # # https://github.com/mok232/CIFAR-10-Image-Classification
     # # https://machinelearningmastery.com/how-to-develop-a-cnn-from-scratch-for-cifar-10-photo-classification/
     #===========================================================================
