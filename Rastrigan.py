@@ -18,22 +18,56 @@ import matplotlib.pyplot as plt
 
 from Experiment import Experiment
 
-def rastrigan_function(x):
-    """Rastrigan function. Minimum 0 at (0,0,...,0)""" 
-    A = 10
-    sum = 0
-    for xi in x:
-        sum += A + xi**2 - A*math.cos(2*math.pi*xi)
-    return sum
+dims = [2,4,8]
+difs = [1,10,100]
+nInits = [10,20,30]
+nEpochs = 100
+nRepeat = 20 
+
+class RastrigInExperiment:
+    def __init__(self, difs=difs, dims=dims, nInits=nInits, nEpochs=nEpochs, nRepeat=nRepeat):
+        self.difs = difs
+        self.A = difs[0]
+        self.dims = dims
+        self.nInits = nInits
+        self.nEpochs = nEpochs
+        self.nRepeat = nRepeat
+    
+    def rastrigan_function(self, x):
+        """Rastrigan function. Minimum 0 at (0,0,...,0)""" 
+        rsum = 0
+        for xi in x:
+            rsum += self.A + xi**2 - self.A*math.cos(2*math.pi*xi)
+        return rsum
+
+    def run(self):
+        search_space = list()
+        for dim in self.dims:
+            for dif in self.difs:
+                self.A = dif
+                for nInit in self.nInits:
+                    for i in range(dim):
+                        search_space.append(Real(-5.12,5.12, 'uniform', name='x' + str(i)))
+                    experiment = Experiment(self.rastrigan_function, search_space,
+                                             numberOfEpochs=self.nEpochs, numberOfRepetitions=self.nRepeat,
+                                             numberOfRandom=nInit)
+                    experiment.run()
+                    experiment.plot_convergence()
+                    plt.close()
+    
+    def analyze(self, eid, dim=2):
+        search_space = list()
+        for i in range(dim):
+            search_space.append(Real(-5.12,5.12, 'uniform', name='x' + str(i)))
+        experiment = Experiment(self.rastrigan_function, search_space, numberOfEpochs=15, numberOfRepetitions=2, numberOfRandom=10)
+        experiment.load_results(id=eid)
+        #experiment.plot_convergence()
+        experiment.plot_convergence_time()
+        
+    
     
 if __name__ == '__main__':
-    search_space = list()
-    search_space.append(Real(-5.12,5.12, 'uniform', name='x1'))
-    search_space.append(Real(-5.12,5.12, 'uniform', name='x2'))
-    search_space.append(Real(-5.12,5.12, 'uniform', name='x3'))
-    search_space.append(Real(-5.12,5.12, 'uniform', name='x4'))
-    experiment = Experiment(rastrigan_function, search_space, numberOfEpochs=10, numberOfRepetitions=1, numberOfRandom=10)
-    experiment.run('EI')
-    experiment.plot_convergence()
+    experiment = RastrigInExperiment()
+    experiment.run()
+    #experiment.analyze(42, 4)
     plt.show()
-
