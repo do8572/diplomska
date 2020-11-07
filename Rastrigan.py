@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 
 from Experiment import Experiment
 
-dims = [2,4,8]
+dims = [8,4,2]
 difs = [1,10,100]
 nInits = [10,20,30]
 nEpochs = 100
@@ -68,6 +68,12 @@ class RastrigInExperiment:
     
 if __name__ == '__main__':
     experiment = RastrigInExperiment()
-    experiment.run()
+    #xperiment.run()
     #experiment.analyze(42, 4)
-    plt.show()
+    search_space = list()
+    for i in range(2):
+        search_space.append(Real(-5.12,5.12, 'uniform', name='x' + str(i)))
+    experimentFinish = Experiment(experiment.rastrigan_function, search_space,
+                                             numberOfEpochs=nEpochs, numberOfRepetitions=12,
+                                             numberOfRandom=nInits[1])
+    experimentFinish.run(acqFun=['LCB'])

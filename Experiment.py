@@ -5,33 +5,16 @@ Created on Oct 23, 2020
 '''
 
 import numpy as np
-import math
-from numpy import mean, var
-from pandas import read_csv
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import RepeatedStratifiedKFold
-from sklearn.svm import SVC
-from skopt.space import Integer
-from skopt.space import Real
-from skopt.space import Categorical
-from skopt.utils import use_named_args
 from skopt import gp_minimize, dummy_minimize
-from skopt.plots import plot_convergence
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-import pickle
-import seaborn as sns
 import os
 from time import time
-
-# datasets
-import keras.datasets as kds
 
 #save data
 import csv
 
 class Experiment:
-    def __init__(self, objectiveFunction, searchSpace, id=None, dir='E:/EXPERIMENTS',
+    def __init__(self, objectiveFunction, searchSpace, id=None, dir='/home/ocepek/diplomska/EXPERIMENTS',
                   numberOfEpochs=50, numberOfRepetitions=10, numberOfRandom=10, seed=None):
         """Set function for optimization."""
         self.dir = dir
