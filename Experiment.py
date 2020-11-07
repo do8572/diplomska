@@ -34,6 +34,7 @@ class Experiment:
         self.baseline = []
         self.time_baseline = []
         self.optimizators = []
+        self.patience = 10
         self.savefile = None
         
     def __str__(self):
@@ -60,6 +61,10 @@ class Experiment:
         csv_writer = csv.writer(self.savefile, delimiter=',')
         csv_writer.writerow(res.x_iters[-1] + [res.func_vals[-1].item()] + [time() - self.startime])
         self.savefile.flush()
+        
+    def earlyStopping(self, res):
+        if np.where(res.func_vals == res.fun)[-1] < len(res.func_vals) - self.patience:
+            return True
     
     def getBaseline(self):
         for i in range(self.niter):
@@ -79,7 +84,7 @@ class Experiment:
                                   n_random_starts=0, acq_func=acqFun,
                                   x0=randomPoints.x_iters[:self.nrand],
                                   y0=randomPoints.func_vals[:self.nrand],
-                                  callback=[self.savePoint])
+                                  callback=[self.savePoint, self.earlyStopping])
             if acqFun == 'EI':
                 self.results_EI.append(result)
             elif acqFun == 'PI':
@@ -152,20 +157,20 @@ class Experiment:
         #TODO: plot gridSearch
         if len(self.results_EI) != 0:
             EI_results = self.mean_var(self.results_EI)
+            plt.plot(range(self.ncalls), EI_results[0], 'b', label='EI')
+            plt.fill_between(range(self.ncalls), EI_results[0] - EI_results[1],
+                                  EI_results[0] + EI_results[1], color='blue', alpha=0.2)
         if len(self.results_PI) != 0:
             PI_results = self.mean_var(self.results_PI)
+            plt.plot(range(self.ncalls), PI_results[0], 'g', label='PI')
+            plt.fill_between(range(self.ncalls), PI_results[0] - PI_results[1],
+                                  PI_results[0] + PI_results[1], color='green', alpha=0.2)
         if len(self.results_LCB) != 0:
             LCB_results = self.mean_var(self.results_LCB)
-        meanvar_baseline = self.mean_var(self.baseline)
-        plt.plot(range(self.ncalls), EI_results[0], 'b', label='EI')
-        plt.fill_between(range(self.ncalls), EI_results[0] - EI_results[1],
-                                  EI_results[0] + EI_results[1], color='blue', alpha=0.2)
-        plt.plot(range(self.ncalls), PI_results[0], 'g', label='PI')
-        plt.fill_between(range(self.ncalls), PI_results[0] - PI_results[1],
-                                  PI_results[0] + PI_results[1], color='green', alpha=0.2)
-        plt.plot(range(self.ncalls), LCB_results[0], 'r', label='LCB')
-        plt.fill_between(range(self.ncalls), LCB_results[0] - LCB_results[1],
+            plt.plot(range(self.ncalls), LCB_results[0], 'r', label='LCB')
+            plt.fill_between(range(self.ncalls), LCB_results[0] - LCB_results[1],
                                   LCB_results[0] + LCB_results[1], color='red', alpha=0.2)
+        meanvar_baseline = self.mean_var(self.baseline)
         plt.plot(range(self.ncalls), meanvar_baseline[0], 'k', label='random search')
         plt.fill_between(range(self.ncalls), meanvar_baseline[0] - meanvar_baseline[1],
                               meanvar_baseline[0] + meanvar_baseline[1], color='black', alpha=0.1)
