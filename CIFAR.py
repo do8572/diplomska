@@ -102,13 +102,12 @@ if __name__ == '__main__':
     search_space.append(Integer(10, 50, 'log-uniform', name='epochs'))
     search_space.append(Categorical([32,64,128,256], name='batch_size'))
     (trainX, trainY), (testX, testY) = kds.cifar10.load_data()
-    trainY, testY = prep_data(trainX, trainY, testX, testY)
+    (trainY, trainY), (testX, testY) = prep_data(trainX, trainY, testX, testY)
     model = define_model()
 
-    # experiment = Experiment(evaluate_model, search_space, numberOfEpochs=10, numberOfRepetitions=1, numberOfRandom=10)
-    # experiment.run('EI')
-    # experiment.plot_convergence()
-    evaluate_model([1e-4, 'relu', 0.2, 1e-3, 1e-6, 10, 64])
+    experiment = Experiment(evaluate_model, search_space, numberOfEpochs=10, numberOfRepetitions=1, numberOfRandom=10)
+    experiment.run('EI')
+    experiment.plot_convergence()
 
     #===========================================================================
     # # Viri in literatura
