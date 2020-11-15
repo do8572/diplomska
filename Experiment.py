@@ -125,16 +125,10 @@ class Experiment:
             self.id = self.getid()
         if not os.path.isdir(self.dir + '/' + str(self.id)):
             os.makedirs(self.dir + '/' + str(self.id))
-<<<<<<< HEAD
-        with open(self.dir + '/' + str(self.id) + "/description.txt", "w") as experiment_file:
-            experiment_file.write(self.__str__())
-            experiment_file.close()
-=======
         if not os.path.isfile(self.dir + '/' + str(self.id) + "/description.txt"):
             with open(self.dir + '/' + str(self.id) + "/description.txt", "w") as experiment_file:
                 experiment_file.write(self.__str__())
                 experiment_file.close()
->>>>>>> 68a0ecb27e87882213b7ef351054d21d35f321cb
         self.getBaseline()
         for fun in acqFun:
             self.runExperiment(fun)
