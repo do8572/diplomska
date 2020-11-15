@@ -63,7 +63,7 @@ class Experiment:
         self.savefile.flush()
         
     def earlyStopping(self, res):
-        if np.where(res.func_vals == res.fun)[-1] < len(res.func_vals) - self.patience:
+        if np.where(res.func_vals == res.fun)[0][-1] < len(res.func_vals) - self.patience:
             return True
     
     def getBaseline(self):
@@ -84,7 +84,7 @@ class Experiment:
                                   n_random_starts=0, acq_func=acqFun,
                                   x0=randomPoints.x_iters[:self.nrand],
                                   y0=randomPoints.func_vals[:self.nrand],
-                                  callback=[self.savePoint, self.earlyStopping])
+                                  callback=[self.savePoint])
             if acqFun == 'EI':
                 self.results_EI.append(result)
             elif acqFun == 'PI':
@@ -96,11 +96,11 @@ class Experiment:
     def run(self, acqFun=['EI', 'PI', 'LCB']):
         if self.id == None:
             self.id = self.getid()
-        os.makedirs(self.dir + '/' + str(self.id))
+        if not os.path.isdir(self.dir + '/' + str(self.id)):
+            os.makedirs(self.dir + '/' + str(self.id))
         with open(self.dir + '/' + str(self.id) + "/description.txt", "w") as experiment_file:
             experiment_file.write(self.__str__())
             experiment_file.close()
-        self.startime = time()
         self.getBaseline()
         for fun in acqFun:
             self.runExperiment(fun)        
@@ -119,7 +119,7 @@ class Experiment:
                 result = result.func_vals
             min = float("inf")
             for i in range(self.ncalls):
-                if min > result[i]:
+                if len(result) > i and min > result[i]:
                     min = result[i]
                 mean[i] += min
                 var[i] += min**2
