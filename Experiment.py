@@ -5,6 +5,7 @@ Created on Oct 23, 2020
 '''
 
 import numpy as np
+import skopt
 from skopt import gp_minimize, dummy_minimize
 import matplotlib.pyplot as plt
 import os
@@ -12,6 +13,12 @@ from time import time
 
 #save data
 import csv
+
+class ResultData:
+    def __init__(self, x_iters, fun_vals, time_vals):
+        self.x_iters = x_iters
+        self.func_vals = fun_vals
+        self.time_vals = time_vals
 
 class Experiment:
     def __init__(self, objectiveFunction, searchSpace, id=None, dir='E:/EXPERIMENTS',
@@ -34,8 +41,9 @@ class Experiment:
         self.baseline = []
         self.time_baseline = []
         self.optimizators = []
-        self.patience = 10
+        self.patience = 20
         self.savefile = None
+        self.ignorePoint = False
         
     def __str__(self):
         EXPERIMENT = """Experiment: {id}
@@ -58,26 +66,46 @@ class Experiment:
         return id
         
     def savePoint(self, res):
-        csv_writer = csv.writer(self.savefile, delimiter=',')
-        csv_writer.writerow(res.x_iters[-1] + [res.func_vals[-1].item()] + [time() - self.startime])
-        self.savefile.flush()
+        if not self.ignorePoint:
+            csv_writer = csv.writer(self.savefile, delimiter=',')
+            csv_writer.writerow(res.x_iters[-1] + [res.func_vals[-1].item()] + [time() - self.startime + self.faketime])
+            self.savefile.flush()
+        else:
+            self.ignorePoint = False
         
     def earlyStopping(self, res):
-        if np.where(res.func_vals == res.fun)[-1] < len(res.func_vals) - self.patience:
+        print(res.func_vals)
+        if np.where(res.func_vals == res.fun)[0][0] < len(res.func_vals) - self.patience:
             return True
     
     def getBaseline(self):
+        self.faketime = 0
         for i in range(self.niter):
-            self.savefile = open(self.dir + '/' + str(self.id) + '/baseline_'+ str(i+1) +'.txt', mode='w', newline='')
-            self.startime = time()
-            result = dummy_minimize(self.obj, self.searchSpace, verbose=True, n_calls=self.ncalls,
-                                    callback=[self.savePoint])
+            filename = self.dir + '/' + str(self.id) + '/baseline_'+ str(i+1) +'.txt'
+            if os.path.isfile(filename):
+                x_iters,y_vals,time_vals = self.load_baseline(self.id, i)
+                if self.ncalls-len(y_vals) > 0:
+                    self.savefile = open(filename, mode='a', newline='')
+                    self.startime = time()
+                    self.faketime = time_vals[-1]
+                    result = dummy_minimize(self.obj, self.searchSpace, verbose=True, n_calls=self.ncalls-len(y_vals),
+                                        x0=x_iters, y0=y_vals, callback=[self.savePoint, self.earlyStopping])
+                else:
+                    result = ResultData(x_iters, y_vals, time_vals)
+                self.ignorePoint = True
+            else:
+                self.savefile = open(filename, mode='w', newline='')
+                self.startime = time()
+                result = dummy_minimize(self.obj, self.searchSpace, verbose=True, n_calls=self.ncalls,
+                                    callback=[self.savePoint, self.earlyStopping])
             self.baseline.append(result)
-            self.savefile.close()            
+            if self.savefile != None:
+                self.savefile.close()
             
     def runExperiment(self,acqFun):
         for i in range(self.niter):
-            self.savefile = open(self.dir + '/' + str(self.id) + '/'+ acqFun +'_'+ str(i+1) +'.txt', mode='w', newline='')
+            filename = self.dir + '/' + str(self.id) + '/'+ acqFun +'_'+ str(i+1) +'.txt'
+            self.savefile = open(filename, mode='w', newline='')
             randomPoints = self.baseline[i]
             self.startime = time()
             result = gp_minimize(self.obj, self.searchSpace, verbose=True, n_calls=self.ncalls-self.nrand,
@@ -96,14 +124,15 @@ class Experiment:
     def run(self, acqFun=['EI', 'PI', 'LCB']):
         if self.id == None:
             self.id = self.getid()
-        os.makedirs(self.dir + '/' + str(self.id))
-        with open(self.dir + '/' + str(self.id) + "/description.txt", "w") as experiment_file:
-            experiment_file.write(self.__str__())
-            experiment_file.close()
-        self.startime = time()
+        if not os.path.isdir(self.dir + '/' + str(self.id)):
+            os.makedirs(self.dir + '/' + str(self.id))
+        if not os.path.isfile(self.dir + '/' + str(self.id) + "/description.txt"):
+            with open(self.dir + '/' + str(self.id) + "/description.txt", "w") as experiment_file:
+                experiment_file.write(self.__str__())
+                experiment_file.close()
         self.getBaseline()
         for fun in acqFun:
-            self.runExperiment(fun)        
+            self.runExperiment(fun)
     
     def addTuner(self, tuner):
         self.optimizators.append(tuner)
@@ -119,7 +148,7 @@ class Experiment:
                 result = result.func_vals
             min = float("inf")
             for i in range(self.ncalls):
-                if min > result[i]:
+                if len(result) > i and min > result[i]:
                     min = result[i]
                 mean[i] += min
                 var[i] += min**2
@@ -129,6 +158,31 @@ class Experiment:
     
     def plot_map(self):
         pass
+    
+    def load_baseline(self, id, i):
+        fun_file = open(self.dir + '/' + str(id) + '/baseline_'+ str(i+1) +'.txt', mode='r')
+        csv_reader = csv.reader(fun_file, delimiter=',')
+        x_iters = []
+        fun_vals = []
+        time_vals = []
+        for row in csv_reader:
+            x_iter = []
+            for j in range(len(row[:-2])):
+                if isinstance(self.searchSpace[j], skopt.space.space.Real):
+                    x_iter.append(float(row[j]))
+                elif isinstance(self.searchSpace[j], skopt.space.space.Integer):
+                    x_iter.append(int(row[j]))
+                elif isinstance(self.searchSpace[j], skopt.space.space.Categorical):
+                    if row[j].isnumeric():
+                        x_iter.append(int(row[j]))
+                    else:
+                        x_iter.append(row[j])
+            x_iters.append(x_iter)
+            fun_vals.append(float(row[-2]))
+            time_vals.append(float(row[-1]))
+        fun_file.close()
+        return x_iters, fun_vals, time_vals
+        
     
     def load_results(self, id=None, acqFuns=['baseline', 'EI', 'PI', 'LCB']):
         self.id = id
