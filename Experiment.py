@@ -80,7 +80,7 @@ class Experiment:
     def getBaseline(self):
         self.faketime = 0
         for i in range(self.niter):
-            filename = self.dir + '/' + str(self.id) + '/baseline_'+ str(i+1) +'.txt'
+            filename = self.dir + '/experiments/' + str(self.id) + '/baseline_'+ str(i+1) +'.txt'
             if os.path.isfile(filename):
                 x_iters,y_vals,time_vals = self.load_baseline(self.id, i)
                 if self.ncalls-len(y_vals) > 0:
@@ -103,7 +103,7 @@ class Experiment:
             
     def runExperiment(self,acqFun):
         for i in range(self.niter):
-            filename = self.dir + '/' + str(self.id) + '/'+ acqFun +'_'+ str(i+1) +'.txt'
+            filename = self.dir + '/experiments/' + str(self.id) + '/'+ acqFun +'_'+ str(i+1) +'.txt'
             self.savefile = open(filename, mode='w', newline='')
             randomPoints = self.baseline[i]
             self.startime = time()
@@ -123,10 +123,10 @@ class Experiment:
     def run(self, acqFun=['EI', 'PI', 'LCB']):
         if self.id == None:
             self.id = self.getid()
-        if not os.path.isdir(self.dir + '/' + str(self.id)):
-            os.makedirs(self.dir + '/' + str(self.id))
-        if not os.path.isfile(self.dir + '/' + str(self.id) + "/description.txt"):
-            with open(self.dir + '/' + str(self.id) + "/description.txt", "w") as experiment_file:
+        if not os.path.isdir(self.dir + '/experiments/' + str(self.id)):
+            os.makedirs(self.dir + '/experiments/' + str(self.id))
+        if not os.path.isfile(self.dir + "/descriptions/description" + str(self.id) + ".txt"):
+            with open(self.dir + "/descriptions/description" + str(self.id) + ".txt", "w") as experiment_file:
                 experiment_file.write(self.__str__())
                 experiment_file.close()
         self.getBaseline()
@@ -228,7 +228,7 @@ class Experiment:
         plt.fill_between(range(self.ncalls), meanvar_baseline[0] - meanvar_baseline[1],
                               meanvar_baseline[0] + meanvar_baseline[1], color='black', alpha=0.1)
         plt.legend()
-        plt.savefig(self.dir + '/' + str(self.id) + '/convergence'+ str(self.id) +'.png')
+        plt.savefig(self.dir + '/images/convergence'+ str(self.id) +'.png')
     
     def load_time(self, id=None, acqFuns=['baseline', 'EI', 'PI', 'LCB']):
         self.id = id
@@ -273,7 +273,7 @@ class Experiment:
         plt.plot(LCB_times, LCB_results[0], 'r', label='LCB')
         plt.plot(meanvar_time_baseline, meanvar_baseline[0], 'k', label='random search')
         plt.legend()
-        plt.savefig(self.dir + '/' + str(self.id) + '/convergence'+ str(self.id) +'.png')
+        plt.savefig(self.dir + '/' + str(self.id) + '/images/convergence'+ str(self.id) +'.png')
     
     def plot_distribution(self):
         pass

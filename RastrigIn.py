@@ -4,8 +4,8 @@ Created on Oct 20, 2020
 @author: david
 
 Compare bayesian optimization on an eggholder function.
-Number of epochs: 50
-Number of experiments: 100
+Number of epochs: 200
+Number of experiments: 10
 Return:
     - (mean, variance) values for each epoch
     - time logs for each epoch
@@ -15,14 +15,15 @@ Return:
 import math
 from skopt.space import Real
 import matplotlib.pyplot as plt
+from time import time
 
 from Experiment import Experiment
 
 dims = [2,4,8]
 difs = [1,10,100]
 nInits = [10,20,30]
-nEpochs = 100
-nRepeat = 20 
+nEpochs = 200
+nRepeat = 10 
 
 class RastrigInExperiment:
     def __init__(self, difs=difs, dims=dims, nInits=nInits, nEpochs=nEpochs, nRepeat=nRepeat):
@@ -59,7 +60,9 @@ class RastrigInExperiment:
         search_space = list()
         for i in range(dim):
             search_space.append(Real(-5.12,5.12, 'uniform', name='x' + str(i)))
-        experiment = Experiment(self.rastrigan_function, search_space, numberOfEpochs=15, numberOfRepetitions=2, numberOfRandom=10)
+        experiment = Experiment(self.rastrigan_function, search_space,
+                                             numberOfEpochs=self.nEpochs, numberOfRepetitions=self.nRepeat,
+                                             numberOfRandom=nInit)
         experiment.load_results(id=eid)
         #experiment.plot_convergence()
         experiment.plot_convergence_time()
@@ -67,6 +70,9 @@ class RastrigInExperiment:
     
     
 if __name__ == '__main__':
+    start =time()
     experiment = RastrigInExperiment()
     experiment.run()
     #experiment.analyze(42, 4)
+    end = time()
+    print("Runtime: ", end-start)
