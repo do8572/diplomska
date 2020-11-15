@@ -105,10 +105,16 @@ if __name__ == '__main__':
     (trainY, trainY), (testX, testY) = prep_data(trainX, trainY, testX, testY)
     model = define_model()
 
+<<<<<<< HEAD
     for i in range(3):
         experiment = Experiment(evaluate_model, search_space, numberOfEpochs=80, numberOfRepetitions=1, numberOfRandom=20)
         experiment.run()
         experiment.plot_convergence()
+=======
+    experiment = Experiment(evaluate_model, search_space, numberOfEpochs=10, numberOfRepetitions=1, numberOfRandom=10)
+    experiment.run('EI')
+    experiment.plot_convergence()
+>>>>>>> 68a0ecb27e87882213b7ef351054d21d35f321cb
 
     #===========================================================================
     # # Viri in literatura
