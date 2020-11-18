@@ -1,0 +1,7 @@
+Experiment: 21
+        function: <bound method RastrigInExperiment.rastrigan_function of <__main__.RastrigInExperiment object at 0x7fcbbeeb8a60>>
+        search space: [Real(low=-5.12, high=5.12, prior='uniform', transform='identity'), Real(low=-5.12, high=5.12, prior='uniform', transform='identity'), Real(low=-5.12, high=5.12, prior='uniform', transform='identity'), Real(low=-5.12, high=5.12, prior='uniform', transform='identity'), Real(low=-5.12, high=5.12, prior='uniform', transform='identity'), Real(low=-5.12, high=5.12, prior='uniform', transform='identity'), Real(low=-5.12, high=5.12, prior='uniform', transform='identity'), Real(low=-5.12, high=5.12, prior='uniform', transform='identity')]
+        number of experiments: 10
+        number of epochs per experiment: 200
+        number of initialization points: 30
+        
