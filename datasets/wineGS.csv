@@ -178,4 +178,3 @@
 0.9623093681917212,0.04439903271863431,"{'learning_rate': 1.0, 'max_depth': 9, 'n_estimators': 500, 'subsample': 0.5}"
 0.9663398692810454,0.04224964878119034,"{'learning_rate': 1.0, 'max_depth': 9, 'n_estimators': 500, 'subsample': 0.7}"
 0.9383442265795205,0.05452545799406765,"{'learning_rate': 1.0, 'max_depth': 9, 'n_estimators': 500, 'subsample': 1.0}"
-

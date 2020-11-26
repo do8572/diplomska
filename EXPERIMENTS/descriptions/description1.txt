@@ -1,7 +1,7 @@
 Experiment: 1
-        function: <bound method RastrigInExperiment.rastrigan_function of <__main__.RastrigInExperiment object at 0x7fcbbeeb8a60>>
-        search space: [Real(low=-5.12, high=5.12, prior='uniform', transform='identity'), Real(low=-5.12, high=5.12, prior='uniform', transform='identity')]
+        function: <function evaluate_model at 0x7f80b00411f0>
+        search space: [Integer(low=10, high=500, prior='log-uniform', transform='identity'), Real(low=0.1, high=1.0, prior='uniform', transform='identity'), Integer(low=4, high=16, prior='log-uniform', transform='identity')]
         number of experiments: 10
-        number of epochs per experiment: 200
+        number of epochs per experiment: 108
         number of initialization points: 10
         
