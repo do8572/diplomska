@@ -96,7 +96,7 @@ class Experiment:
                 self.savefile = open(filename, mode='w', newline='')
                 self.startime = time()
                 result = dummy_minimize(self.obj, self.searchSpace, verbose=True, n_calls=self.ncalls,
-                                    callback=[self.savePoint, self.earlyStopping])
+                                    callback=[self.savePoint])
             self.baseline.append(result)
             if self.savefile != None:
                 self.savefile.close()

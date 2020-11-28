@@ -105,7 +105,7 @@ def load_results(tarfile):
 def init_space():
     search_space = list()
     search_space.append(Integer(10, 500, 'log-uniform', name='n_estimators'))
-    search_space.append(Real(0.1, 1.0, 'uniform', name='max_samples'))
+    search_space.append(Real(0.1, 0.95, 'uniform', name='max_samples'))
     search_space.append(Integer(4, 16, 'log-uniform', name='max_features'))
     return search_space
 
@@ -126,7 +126,7 @@ if  __name__ == '__main__':
     save_results(means,stds,params, 'datasets/adultGS.csv')
     search_space = init_space()
     start2 = time()
-    experiment = Experiment(evaluate_model, search_space, numberOfEpochs=108, numberOfRepetitions=10, numberOfRandom=10)
+    experiment = Experiment(evaluate_model, search_space, numberOfEpochs=108, numberOfRepetitions=5, numberOfRandom=10)
     experiment.run(['EI'])
     end2 = time()
     experiment.plot_convergence()
