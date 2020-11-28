@@ -1,0 +1,7 @@
+Experiment: 1
+        function: <function evaluate_model at 0x7fb8b4895280>
+        search space: [Integer(low=10, high=500, prior='log-uniform', transform='identity'), Real(low=0.1, high=1.0, prior='uniform', transform='identity'), Integer(low=4, high=16, prior='log-uniform', transform='identity')]
+        number of experiments: 10
+        number of epochs per experiment: 108
+        number of initialization points: 10
+        
