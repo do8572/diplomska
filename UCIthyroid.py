@@ -151,7 +151,7 @@ if  __name__ == '__main__':
     means = grid_result.cv_results_['mean_test_score']
     stds = grid_result.cv_results_['std_test_score']
     params = grid_result.cv_results_['params']
-    save_results(means,stds,params, 'datasets/adultGS.csv')
+    save_results(means,stds,params, 'datasets/thyroidGS.csv')
     search_space = init_space()
     start2 = time()
     experiment = Experiment(evaluate_model, search_space, numberOfEpochs=108, numberOfRepetitions=5, numberOfRandom=10)

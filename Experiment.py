@@ -159,7 +159,7 @@ class Experiment:
         pass
     
     def load_baseline(self, id, i):
-        fun_file = open(self.dir + '/' + str(id) + '/baseline_'+ str(i+1) +'.txt', mode='r')
+        fun_file = open(self.dir + '/experiments/' + str(id) + '/baseline_'+ str(i+1) +'.txt', mode='r')
         csv_reader = csv.reader(fun_file, delimiter=',')
         x_iters = []
         fun_vals = []
