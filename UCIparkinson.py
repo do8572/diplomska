@@ -65,12 +65,17 @@ def monte_carlo_grid_search(means, stds, n_repeats):
     return avg_means, avg_stds
 
 def evaluate_model(params):
-    model = GradientBoostingRegressor(n_estimators=params[0], subsample=params[1],
-                                        learning_rate=params[2], max_depth=params[3])
-    n_scores = cross_val_score(model, X, y, scoring='neg_mean_squared_error', cv=5, n_jobs=-1)
-    if np.isnan(n_scores).any():
+    try:
+        model = GradientBoostingRegressor(n_estimators=params[0], subsample=params[1],
+                                            learning_rate=params[2], max_depth=params[3])
+        n_scores = cross_val_score(model, X, y, scoring='neg_mean_squared_error', cv=5, n_jobs=-1)
+    except ValueError:
         return 200
-    return -np.mean(n_scores)
+    if np.all(np.isfinite(n_scores)):
+        if -np.mean(n_scores) > 200:
+            return 200
+        return -np.mean(n_scores)
+    
 
 def init_space():
     search_space = list()

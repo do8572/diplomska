@@ -41,7 +41,7 @@ class Experiment:
         self.baseline = []
         self.time_baseline = []
         self.optimizators = []
-        self.patience = 20
+        self.patience = 50
         self.savefile = None
         self.ignorePoint = False
         
